@@ -59,6 +59,11 @@
     #qrcode {
       margin-top: 1.5rem;
     }
+    #placaTexto {
+      margin-top: 1rem;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
   </style>
 </head>
 <body>
@@ -76,7 +81,7 @@
       <button onclick="baixarQRCode()">Baixar</button>
     </div>
     <div id="qrcode"></div>
-<p id="placaTexto" style="margin-top: 1rem; font-weight: bold; font-size: 1.1rem;"></p>
+    <p id="placaTexto"></p>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -99,6 +104,9 @@
         height: 200
       });
 
+      // Mostra a placa abaixo do QR
+      document.getElementById("placaTexto").textContent = `Placa: ${plate}`;
+
       enviarParaGoogleSheets(plate, type);
     }
 
@@ -106,15 +114,29 @@
       document.getElementById("plate").value = "";
       document.getElementById("vehicleType").selectedIndex = 0;
       document.getElementById("qrcode").innerHTML = "";
+      document.getElementById("placaTexto").textContent = "";
     }
 
     function baixarQRCode() {
       const qrImg = document.querySelector("#qrcode img");
-      if (!qrImg) return alert("Gere um QR Code primeiro.");
+      const qrCanvas = document.querySelector("#qrcode canvas");
+      let dataUrl = "";
+
+      if (qrImg) {
+        dataUrl = qrImg.src;
+      } else if (qrCanvas) {
+        dataUrl = qrCanvas.toDataURL("image/png");
+      } else {
+        alert("Gere um QR Code primeiro.");
+        return;
+      }
+
       const a = document.createElement("a");
-      a.href = qrImg.src;
+      a.href = dataUrl;
       a.download = "qrcode.png";
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
     }
 
     function enviarParaGoogleSheets(plate, type) {
