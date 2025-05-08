@@ -107,6 +107,115 @@
       document.getElementById("qrcode").innerHTML = "";
     }
 
+    
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Frota</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    .logo {
+      width: 180px;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      color: #2a7f62;
+      margin-bottom: 1rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #2a7f62;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem 1.5rem;
+      margin: 0.5rem 0.25rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #226b52;
+    }
+    #qrcode {
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="logo.png" alt="Logo Guardian Angel" class="logo" />
+    <h1>QR Code Frota</h1>
+    <input type="text" id="plate" placeholder="Digite a placa" maxlength="8" />
+    <select id="vehicleType">
+      <option value="car">Carro</option>
+      <option value="motorcycle">Moto</option>
+    </select>
+    <div>
+      <button onclick="gerarQRCode()">Gerar</button>
+      <button onclick="limparCampos()">Limpar</button>
+      <button onclick="baixarQRCode()">Baixar</button>
+    </div>
+    <div id="qrcode"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    function gerarQRCode() {
+      const plate = document.getElementById("plate").value.trim().toUpperCase();
+      const type = document.getElementById("vehicleType").value;
+
+      if (!plate) {
+        alert("Digite a placa!");
+        return;
+      }
+
+      const jsonData = JSON.stringify({ plate, type });
+      document.getElementById("qrcode").innerHTML = "";
+
+      new QRCode(document.getElementById("qrcode"), {
+        text: jsonData,
+        width: 200,
+        height: 200
+      });
+
+      enviarParaGoogleSheets(plate, type);
+    }
+
+    function limparCampos() {
+      document.getElementById("plate").value = "";
+      document.getElementById("vehicleType").selectedIndex = 0;
+      document.getElementById("qrcode").innerHTML = "";
+    }
+
     function baixarQRCode() {
       const qrImg = document.querySelector("#qrcode img");
       if (!qrImg) return alert("Gere um QR Code primeiro.");
@@ -115,6 +224,23 @@
       a.download = "qrcode.png";
       a.click();
     }
+
+    function enviarParaGoogleSheets(plate, type) {
+      const url = "https://script.google.com/a/macros/stone.com.br/s/AKfycby0Y8H1unz0tdI_wypXGZIKYxNcLnHegUKSH6bqza9ZA5lcj-aWXn7mYE77e2w7aNsjfA/exec";
+      const data = { plate, type };
+
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(json => console.log("Enviado:", json))
+      .catch(err => console.error("Erro ao enviar:", err));
+    }
+  </script>
+</body>
+</html>
 
     function enviarParaGoogleSheets(plate, type) {
       const url = "https://script.google.com/a/macros/stone.com.br/s/AKfycby0Y8H1unz0tdI_wypXGZIKYxNcLnHegUKSH6bqza9ZA5lcj-aWXn7mYE77e2w7aNsjfA/exec";
